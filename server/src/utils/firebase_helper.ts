@@ -1,11 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, query, where, doc, updateDoc, addDoc } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  getDocs, 
+  query, 
+  where, 
+  doc, 
+  updateDoc, 
+  addDoc 
+} from "firebase/firestore";
 import * as dotenv from "dotenv";
+import { Wallet, Pool } from "../types/types.js";
 
-// .env dosyasını yükle
 dotenv.config();
 
-// Firebase konfigürasyonu
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -15,27 +23,28 @@ const firebaseConfig = {
   appId: process.env.FIREBASE_APP_ID,
 };
 
-// Firebase uygulamasını başlat
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Tüm dokümanları koleksiyondan çekme
-async function fetchDocs(collectionName) {
+async function fetchDocs<T>(collectionName: string): Promise<T[]> {
   try {
     const collectionRef = collection(db, collectionName);
     const snapshot = await getDocs(collectionRef);
     return snapshot.docs.map((doc) => ({
-      id: doc.id, // Doküman ID
-      ...doc.data(), // Doküman verileri
-    }));
+      id: doc.id,
+      ...doc.data(),
+    })) as T[];
   } catch (error) {
     console.error(`Error fetching documents from ${collectionName}:`, error);
     return [];
   }
 }
 
-// Belirli bir sorguya göre doküman çekme
-async function fetchDocByQuery(collectionName, fieldName, value) {
+async function fetchDocByQuery<T>(
+  collectionName: string, 
+  fieldName: string, 
+  value: string
+): Promise<T | null> {
   try {
     const collectionRef = collection(db, collectionName);
     const q = query(collectionRef, where(fieldName, "==", value));
@@ -46,17 +55,20 @@ async function fetchDocByQuery(collectionName, fieldName, value) {
     }
 
     return {
-      id: snapshot.docs[0].id, // Doküman ID
-      ...snapshot.docs[0].data(), // Doküman verileri
-    };
+      id: snapshot.docs[0].id,
+      ...snapshot.docs[0].data(),
+    } as T;
   } catch (error) {
     console.error(`Error fetching document from ${collectionName}:`, error);
     return null;
   }
 }
 
-// Dokümanı güncelleme
-async function updateDocument(collectionName, docId, data) {
+async function updateDocument(
+  collectionName: string, 
+  docId: string, 
+  data: Partial<Wallet | Pool>
+): Promise<boolean> {
   try {
     const docRef = doc(db, collectionName, docId);
     await updateDoc(docRef, data);
@@ -67,9 +79,10 @@ async function updateDocument(collectionName, docId, data) {
   }
 }
 
-
-// Yeni doküman ekleme
-async function addDocument(collectionName, data) {
+async function addDocument(
+  collectionName: string, 
+  data: Partial<Wallet | Pool>
+): Promise<boolean> {
   try {
     const collectionRef = collection(db, collectionName);
     const result = await addDoc(collectionRef, data);
@@ -83,5 +96,4 @@ async function addDocument(collectionName, data) {
   }
 }
 
-// db ve yardımcı fonksiyonları dışa aktar
-export { fetchDocs, fetchDocByQuery, updateDocument, addDocument };
+export { fetchDocs, fetchDocByQuery, updateDocument, addDocument }; 
