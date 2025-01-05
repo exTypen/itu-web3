@@ -1,25 +1,22 @@
-import { fetchDocs, fetchDocByQuery, updateDocument } from "../utils/firebase_helper.js";
-import { Pool } from "../types/types.js";
+import { FirebaseHelper } from "../utils/firebase_helper";
+import { Pool } from "../types/types";
 
-async function getPools(): Promise<Pool[]> {
-  return await fetchDocs<Pool>("pools");
-}
+export class PoolService {
+  private firebaseHelper = new FirebaseHelper();
+  async getPools(): Promise<Pool[]> {
+    return await this.firebaseHelper.fetchDocs<Pool>("pools");
+  }
 
-async function getPoolById(poolId: string): Promise<Pool | null> {
-  return await fetchDocByQuery<Pool>("pools", "id", poolId);
-}
+  async getPoolById(poolId: string): Promise<Pool | null> {
+    return await this.firebaseHelper.fetchDocByQuery<Pool>("pools", "id", poolId);
+  }
 
-async function updatePool(pool: Pool): Promise<boolean> {
-  try {
-    return await updateDocument("pools", pool.id, pool);
-  } catch (error) {
-    console.error("Error updating pool:", error);
-    return false;
+  async updatePool(pool: Pool): Promise<boolean> {
+    try {
+      return await this.firebaseHelper.updateDocument("pools", pool.id, pool);
+    } catch (error) {
+      console.error("Error updating pool:", error);
+      return false;
+    }
   }
 }
-
-export default {
-  getPools,
-  getPoolById,
-  updatePool,
-}; 

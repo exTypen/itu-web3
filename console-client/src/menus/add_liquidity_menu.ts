@@ -1,23 +1,28 @@
 import inquirer from "inquirer";
-import poolService from "../services/pool_service.js";
-import transactionManager from "../managers/transaction_manager.js";
-import authManager from "../managers/auth_manager.js";
+import { PoolService } from "../services/pool_service";
+import { AuthManager } from "../managers/auth_manager";
+import { TransactionService } from "../services/transaction_service";
 
-async function SwapMenu(pool_id: string): Promise<void> {
+async function AddLiquidityMenu(pool_id: string): Promise<void> {
+  const poolService = new PoolService();
+  const transactionService = new TransactionService();
+  const authManager = new AuthManager();
+
   const pool = await poolService.getPoolById(pool_id);
   
   if (!pool) return;
   
-  const { choice } = await inquirer.prompt<{ choice: number | string }>([{
+  const { choice } = await inquirer.prompt([{
     type: "list",
     name: "choice",
-    message: "Swap Menu",
+    message: "Add Liquidity Menu",
     choices: [
-      {name: Object.keys(pool.token_1)[0] + "->" + Object.keys(pool.token_2)[0], value: 1}, 
-      {name: Object.keys(pool.token_2)[0] + "->" + Object.keys(pool.token_1)[0], value: 2}, 
+      {name: Object.keys(pool.token_1)[0], value: 1}, 
+      {name: Object.keys(pool.token_2)[0], value: 2}, 
       {name: "Return Back", value: "Return Back"}
     ]
-}]);
+  }]);
+
   if(choice === 1) {
     const { amount } = await inquirer.prompt([{
       type: "input",
@@ -27,7 +32,7 @@ async function SwapMenu(pool_id: string): Promise<void> {
     
     const privateKey = authManager.getPrivateKey();
     if (privateKey) {
-      await transactionManager.swap(
+      await transactionService.addLiquidity(
         privateKey, 
         pool_id, 
         Object.keys(pool.token_1)[0], 
@@ -43,7 +48,7 @@ async function SwapMenu(pool_id: string): Promise<void> {
     
     const privateKey = authManager.getPrivateKey();
     if (privateKey) {
-      await transactionManager.swap(
+      await transactionService.addLiquidity(
         privateKey, 
         pool_id, 
         Object.keys(pool.token_2)[0], 
@@ -53,4 +58,4 @@ async function SwapMenu(pool_id: string): Promise<void> {
   }
 }
 
-export default SwapMenu; 
+export default AddLiquidityMenu; 

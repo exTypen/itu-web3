@@ -1,7 +1,8 @@
-import walletService from "../services/wallet_service.js";
+import { WalletService } from "../services/wallet_service";
 import chalk from "chalk";
 
 async function WalletMenu(publicKey: string): Promise<void> {
+  const walletService = new WalletService();
   const wallet = await walletService.getWalletByPublicKey(publicKey);
   
   if (wallet) {

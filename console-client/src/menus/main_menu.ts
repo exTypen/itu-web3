@@ -1,12 +1,13 @@
 import inquirer from "inquirer";
-import AuthManager from "../managers/auth_manager.js";
-import ItuScanMenu from "./ituscan_menu.js";
-import WalletMenu from "./wallet_menu.js";
-import PoolsMenu from "./pools_menu.js";
+import { AuthManager } from "../managers/auth_manager";
+import ItuScanMenu from "./ituscan_menu";
+import WalletMenu from "./wallet_menu";
+import PoolsMenu from "./pools_menu";
 
 async function MainMenu(): Promise<void> {
-  if (AuthManager.isLoggedIn()) {
-    console.log("\nConnected Wallet: " + AuthManager.getCurrentWallet());
+  const authManager = new AuthManager();
+  if (authManager.isLoggedIn()) {
+    console.log("\nConnected Wallet: " + authManager.getCurrentWallet());
   } else {
     console.log("Wallet not connected");
   }
@@ -14,12 +15,12 @@ async function MainMenu(): Promise<void> {
   console.log("----------------------------------------------------------------------------------------");
   
   const choices : any[]= [
-    { name: "My Balances", disabled: !AuthManager.isLoggedIn()}, 
+    { name: "My Balances", disabled: !authManager.isLoggedIn()}, 
     { name: "ITUScan" }, 
     { name: "Pools" }
   ];
 
-  AuthManager.isLoggedIn() ? choices.push({ name: "Disconnect" }) : choices.push({ name: "Initialize Wallet" });
+  authManager.isLoggedIn() ? choices.push({ name: "Disconnect" }) : choices.push({ name: "Initialize Wallet" });
 
   const { choice } = await inquirer.prompt([{
     type: "list",
@@ -29,7 +30,7 @@ async function MainMenu(): Promise<void> {
   }]);
 
   if (choice === "My Balances") {
-    const currentWallet = AuthManager.getCurrentWallet();
+    const currentWallet = authManager.getCurrentWallet();
     if (currentWallet) {
       await WalletMenu(currentWallet);
     }
@@ -47,10 +48,10 @@ async function MainMenu(): Promise<void> {
       message: "Enter your secret phrase:",
     }]);
 
-    await AuthManager.login(phraseKey);
+    await authManager.login(phraseKey);
     await MainMenu();
   } else if(choice === "Disconnect") {
-    AuthManager.disconnect();
+    authManager.disconnect();
     await MainMenu();
   }
 }

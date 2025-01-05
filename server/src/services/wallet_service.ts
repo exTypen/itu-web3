@@ -1,25 +1,21 @@
-import { fetchDocs, fetchDocByQuery, updateDocument, addDocument } from "../utils/firebase_helper.js";
-import { Wallet } from "../types/types.js";
+import { FirebaseHelper } from "../utils/firebase_helper";
+import { Wallet } from "../types/types";
 
-async function getWallets(): Promise<Wallet[]> {
-  return await fetchDocs<Wallet>("wallets");
+export class WalletService {
+  private firebaseHelper = new FirebaseHelper();
+  public async getWallets(): Promise<Wallet[]> {
+    return await this.firebaseHelper.fetchDocs<Wallet>("wallets");
+  }
+
+  async getWalletByPublicKey(publicKey: string): Promise<Wallet | null> {
+    return await this.firebaseHelper.fetchDocByQuery<Wallet>("wallets", "public_key", publicKey);
+  }
+
+  async updateWallet(wallet: Wallet): Promise<boolean> {
+    return await this.firebaseHelper.updateDocument("wallets", wallet.id, wallet);
+  }
+
+  async addWallet(wallet: Partial<Wallet>): Promise<boolean> {
+    return await this.firebaseHelper.addDocument("wallets", wallet);
+  }
 }
-
-async function getWalletByPublicKey(publicKey: string): Promise<Wallet | null> {
-  return await fetchDocByQuery<Wallet>("wallets", "public_key", publicKey);
-}
-
-async function updateWallet(wallet: Wallet): Promise<boolean> {
-  return await updateDocument("wallets", wallet.id, wallet);
-}
-
-async function addWallet(wallet: Partial<Wallet>): Promise<boolean> {
-  return await addDocument("wallets", wallet);
-}
-
-export default {
-  getWallets,
-  getWalletByPublicKey,
-  updateWallet,
-  addWallet
-}; 
