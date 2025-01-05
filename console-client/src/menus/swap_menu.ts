@@ -1,9 +1,11 @@
 import inquirer from "inquirer";
-import poolService from "../services/pool_service.js";
-import transactionManager from "../managers/transaction_manager.js";
-import authManager from "../managers/auth_manager.js";
+import authManager from "../managers/auth_manager";
+import { PoolService } from "../services/pool_service";
+import { TransactionService } from "../services/transaction_service";
 
 async function SwapMenu(pool_id: string): Promise<void> {
+  const poolService = new PoolService();
+  const transactionService = new TransactionService();
   const pool = await poolService.getPoolById(pool_id);
   
   if (!pool) return;
@@ -27,7 +29,7 @@ async function SwapMenu(pool_id: string): Promise<void> {
     
     const privateKey = authManager.getPrivateKey();
     if (privateKey) {
-      await transactionManager.swap(
+      await transactionService.swap(
         privateKey, 
         pool_id, 
         Object.keys(pool.token_1)[0], 
@@ -43,7 +45,7 @@ async function SwapMenu(pool_id: string): Promise<void> {
     
     const privateKey = authManager.getPrivateKey();
     if (privateKey) {
-      await transactionManager.swap(
+      await transactionService.swap(
         privateKey, 
         pool_id, 
         Object.keys(pool.token_2)[0], 

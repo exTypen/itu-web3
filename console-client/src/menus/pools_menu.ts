@@ -1,9 +1,9 @@
 import inquirer from "inquirer";
-import poolService from "../services/pool_service.js";
-import PoolMenu from "./pool_menu.js";
-import AuthManager from "../managers/auth_manager.js";
+import { PoolService } from "../services/pool_service";
+import PoolMenu from "./pool_menu";
 
 async function PoolsMenu(): Promise<void> {
+  const poolService = new PoolService();
   const pools = await poolService.getPools();
 
   const poolsChoices = pools.map((pool) => ({

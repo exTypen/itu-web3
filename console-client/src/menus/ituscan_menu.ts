@@ -1,10 +1,11 @@
 import inquirer from "inquirer";
-import WalletMenu from "./wallet_menu.js";
-import walletService from "../services/wallet_service.js";
-
+import { WalletService } from "../services/wallet_service";
+import WalletMenu from "./wallet_menu";
+import { Wallet } from "../types/types";
 async function ItuScanMenu(): Promise<void> {
-  const wallets = await walletService.getWallets();
-  const publicKeys = wallets.map((wallet) => wallet.public_key);
+  const walletService = new WalletService();
+  const wallets = await walletService.getAllWallets();
+  const publicKeys = wallets.map((wallet: Wallet) => wallet.public_key);
 
   const { choice } = await inquirer.prompt([{
     type: "list",
