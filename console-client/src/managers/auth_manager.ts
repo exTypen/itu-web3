@@ -2,7 +2,7 @@ import { WalletService } from "../services/wallet_service";
 import { HashUtils} from "../utils/hash_utils";
 import { Wallet } from "../types/types";
 
-export class AuthManager {
+class AuthManager {
   private loggedIn: boolean;
   private currentWallet: string | null;
   private privateKey: string | null;
@@ -55,3 +55,5 @@ export class AuthManager {
     return this.privateKey;
   }
 }
+
+export default new AuthManager();

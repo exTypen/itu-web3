@@ -1,12 +1,11 @@
 import inquirer from "inquirer";
 import { PoolService } from "../services/pool_service";
-import { AuthManager } from "../managers/auth_manager";
+import authManager from "../managers/auth_manager";
 import { TransactionService } from "../services/transaction_service";
 
 async function AddLiquidityMenu(pool_id: string): Promise<void> {
   const poolService = new PoolService();
   const transactionService = new TransactionService();
-  const authManager = new AuthManager();
 
   const pool = await poolService.getPoolById(pool_id);
   

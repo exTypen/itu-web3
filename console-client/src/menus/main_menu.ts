@@ -1,11 +1,10 @@
 import inquirer from "inquirer";
-import { AuthManager } from "../managers/auth_manager";
+import authManager from "../managers/auth_manager";
 import ItuScanMenu from "./ituscan_menu";
 import WalletMenu from "./wallet_menu";
 import PoolsMenu from "./pools_menu";
 
 async function MainMenu(): Promise<void> {
-  const authManager = new AuthManager();
   if (authManager.isLoggedIn()) {
     console.log("\nConnected Wallet: " + authManager.getCurrentWallet());
   } else {
