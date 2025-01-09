@@ -1,31 +1,32 @@
 import { ec as EC } from 'elliptic';
 import { Transaction } from '../types/types';
 import { keccak256 } from 'ethereumjs-util';
-import { ecrecover, pubToAddress } from 'ethereumjs-util';
+import { ecrecover, hashPersonalMessage, pubToAddress, toBuffer } from 'ethereumjs-util';
 
 export class SignatureUtils {
     private static ec = new EC('secp256k1');
 
-    /**
-     * Transaction'ı private key ile imzalar
-     * @param transaction İmzalanacak transaction
-     * @param privateKey Private key (hex string)
-     * @returns İmzalanmış transaction
-     */
-    public static signTransaction(transaction: Transaction, privateKey: string): string {
+    public static signTransaction(transaction: any, privateKey: string): string {
+        // Transaction'ı hash'le (Ethereum Signed Message formatı ile)
+        const message = JSON.stringify(transaction); // JSON formatına çevir
+        const formattedMessage = `\x19Ethereum Signed Message:\n${message.length}${message}`;
+        const messageBuffer = Buffer.from(formattedMessage, 'utf8');
+        const messageHash = keccak256(messageBuffer);
+
         // Private key'den key pair oluştur
         const keyPair = this.ec.keyFromPrivate(privateKey);
-        
-        // Transaction'ı hash'le
-        const messageHash = this.hashTransaction(transaction);
-        
+
         // Hash'i imzala
-        const signature = keyPair.sign(messageHash);
-        
+        const signature = keyPair.sign(messageHash, { canonical: true });
+
+        // r, s ve v değerlerini al
+        const r = signature.r.toString('hex').padStart(64, '0'); // 64 karaktere tamamla
+        const s = signature.s.toString('hex').padStart(64, '0');
+        const v = (signature.recoveryParam ?? 0) + 27; // Ethereum için 27 veya 28 ekle
+
         // İmzayı hex string'e çevir
-        const signatureHex = signature.r.toString('hex') + signature.s.toString('hex') + (signature.recoveryParam ?? 0).toString();
-        
-        // Transaction'a imzayı ekle ve geri döndür
+        const signatureHex = `0x${r}${s}${v.toString(16)}`;
+
         return signatureHex;
     }
 
@@ -36,7 +37,11 @@ export class SignatureUtils {
      * @param ethereumAddress Ethereum adresi (hex string)
      * @returns İmza geçerli mi?
      */
-    public static verifyTransaction(transaction: Transaction, signature: string, ethereumAddress: string): boolean {
+    public static verifyTransaction(
+        transaction: any, 
+        signature: string, 
+        ethereumAddress: string
+    ): boolean {
         try {
             if (!signature) {
                 return false;
@@ -48,23 +53,25 @@ export class SignatureUtils {
                 formattedAddress = '0x' + formattedAddress;
             }
 
-            // Transaction hash'ini al
-            const messageHash = this.hashTransaction(transaction);
+            // Transaction'ı hash'le (Ethereum Signed Message formatı ile)
+            const message = JSON.stringify(transaction); // JSON formatına çevir
+            const formattedMessage = `\x19Ethereum Signed Message:\n${message.length}${message}`;
+            const messageBuffer = Buffer.from(formattedMessage, 'utf8'); // UTF-8 olarak buffer'a çevir
+            const messageHash = keccak256(messageBuffer); // Keccak-256 ile hash oluştur
 
             // İmzayı parçala
-            const r = Buffer.from(signature.slice(0, 64), 'hex');
-            const s = Buffer.from(signature.slice(64, 128), 'hex');
-            const v = parseInt(signature.slice(128));
+            const r = Buffer.from(signature.slice(2, 66), 'hex'); // 0x sonrası 64 karakter
+            const s = Buffer.from(signature.slice(66, 130), 'hex'); // Sonraki 64 karakter
+            const v = parseInt(signature.slice(130), 16); // Kalan kısım
 
             // İmzadan public key'i recover et
             const publicKey = ecrecover(messageHash, v, r, s);
-            
+
             // Public key'den adresi hesapla
             const recoveredAddress = '0x' + pubToAddress(publicKey).toString('hex');
 
             // Adresleri karşılaştır
             return recoveredAddress.toLowerCase() === formattedAddress.toLowerCase();
-
         } catch (error) {
             console.error("Doğrulama hatası:", error);
             return false;
