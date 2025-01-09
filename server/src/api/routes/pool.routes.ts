@@ -48,13 +48,13 @@ router.get('/', async (req, res) => {
 
 /**
  * @openapi
- * /pools/{id}:
+ * /pools/{address}:
  *   get:
  *     summary: Belirli bir havuzu getir
  *     description: ID'ye göre belirli bir havuzun bilgilerini getirir.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: address
  *         required: true
  *         schema:
  *           type: string

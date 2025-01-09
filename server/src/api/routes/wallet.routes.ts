@@ -7,42 +7,6 @@ const walletManager = new WalletManager();
 
 /**
  * @openapi
- * /wallets:
- *   get:
- *     summary: Tüm cüzdanları getir
- *     description: Veritabanındaki tüm cüzdanları getirir.
- *     responses:
- *       200:
- *         description: Cüzdanlar başarıyla getirildi.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   public_key:
- *                     type: string
- *                   balance:
- *                     type: number
- *       500:
- *         description: Cüzdanlar getirilirken sunucu hatası.
- */
-
-/*
-router.get('/', async (req, res) => {
-    try {
-        const wallets = await walletManager.getWallets();
-        res.json(wallets);
-    } catch (error) {
-        res.status(500).json({ 
-            error: error instanceof Error ? error.message : 'Cüzdanlar getirilirken bir hata oluştu' 
-        });
-    }
-});*/
-
-/**
- * @openapi
  * /wallets/{publicKey}:
  *   get:
  *     summary: Public key ile cüzdan getir
@@ -85,50 +49,4 @@ router.get('/:publicKey', async (req: Request, res: Response) => {
     }
 });
 
-/**
- * @openapi
- * /wallets:
- *   post:
- *     summary: Yeni cüzdan oluştur
- *     description: Yeni bir cüzdan oluşturur.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               public_key:
- *                 type: string
- *                 description: Kullanıcının public key'i.
- *     responses:
- *       201:
- *         description: Cüzdan başarıyla oluşturuldu.
- *       400:
- *         description: Public key gerekli.
- *       500:
- *         description: Cüzdan oluşturulurken sunucu hatası.
- */
-
-/*
-router.post('/', async (req: Request, res: Response) => {
-    try {
-        const walletData: Wallet = req.body;
-        if (!walletData.public_key) {
-            return res.status(400).json({ error: 'Public key gerekli' });
-        }
-        
-        const result = await walletManager.addWallet(walletData);
-        if (result) {
-            res.status(201).json({ success: true, message: 'Cüzdan başarıyla oluşturuldu' });
-        } else {
-            res.status(500).json({ error: 'Cüzdan oluşturulamadı' });
-        }
-    } catch (error) {
-        res.status(500).json({ 
-            error: error instanceof Error ? error.message : 'Cüzdan oluşturulurken bir hata oluştu' 
-        });
-    }
-});
-*/
 export default router;
