@@ -36,14 +36,14 @@ const poolManager = new PoolManager();
  *         description: Sunucu hatası.
  */
 router.get('/', async (req, res) => {
-    try {
-        const pools = await poolManager.getPools();
-        res.json(pools);
-    } catch (error) {
-        res.status(500).json({ 
-            error: error instanceof Error ? error.message : 'Havuzlar getirilirken bir hata oluştu' 
-        });
-    }
+  try {
+    const pools = await poolManager.getPools();
+    res.json(pools);
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Havuzlar getirilirken bir hata oluştu',
+    });
+  }
 });
 
 /**
@@ -85,17 +85,17 @@ router.get('/', async (req, res) => {
  *         description: Sunucu hatası.
  */
 router.get('/:address', async (req, res) => {
-    try {
-        const pool = await poolManager.getPoolByAddress(req.params.address);
-        if (!pool) {
-            return res.status(404).json({ error: 'Havuz bulunamadı' });
-        }
-        res.json(pool);
-    } catch (error) {
-        res.status(500).json({ 
-            error: error instanceof Error ? error.message : 'Havuz getirilirken bir hata oluştu' 
-        });
+  try {
+    const pool = await poolManager.getPoolByAddress(req.params.address);
+    if (!pool) {
+      return res.status(404).json({ error: 'Havuz bulunamadı' });
     }
+    res.json(pool);
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Havuz getirilirken bir hata oluştu',
+    });
+  }
 });
 
 export default router;

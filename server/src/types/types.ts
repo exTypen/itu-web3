@@ -20,7 +20,7 @@ export interface Pool {
     address: string;
     amount: number;
   };
-} 
+}
 
 export interface Transaction {
   from: string;

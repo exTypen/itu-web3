@@ -1,45 +1,30 @@
-import { WalletService } from "../services/wallet_service";
-import { HashUtils} from "../utils/hash_utils";
-import { Wallet } from "../types/types";
+import { WalletService } from '../services/wallet_service';
+import { HashUtils } from '../utils/hash_utils';
+import { Wallet } from '../types/types';
+import { SignatureUtils } from '../utils/signature_utils';
 
 class AuthManager {
   private loggedIn: boolean;
-  private currentWallet: string | null;
+  private publicKey: string | null;
   private privateKey: string | null;
-  private walletService: WalletService;
   constructor() {
     this.loggedIn = false;
-    this.currentWallet = null;
+    this.publicKey = null;
     this.privateKey = null;
-    this.walletService = new WalletService();
   }
 
-  async login(secretPhrase: string): Promise<boolean> {
-    const privateKey = HashUtils.sha256(secretPhrase);
-    const publicKey = HashUtils.sha256(privateKey);
-    
-    const wallet = await this.walletService.getWalletByPublicKey(publicKey);
-    
-    if (!wallet) {
-      let wallet: Wallet = {
-        public_key: publicKey,
-        balances: { 
-          tokenA: 100, 
-          tokenB: 100 
-        }
-      }
-      await this.walletService.addWallet(wallet);
-    }
+  async setWallet(privateKey: string): Promise<boolean> {
+    const publicKey = SignatureUtils.getPublicKey(privateKey);
 
     this.loggedIn = true;
-    this.currentWallet = publicKey;
+    this.publicKey = publicKey;
     this.privateKey = privateKey;
     return this.loggedIn;
   }
 
   disconnect(): void {
     this.loggedIn = false;
-    this.currentWallet = null;
+    this.publicKey = null;
     this.privateKey = null;
   }
 
@@ -47,8 +32,8 @@ class AuthManager {
     return this.loggedIn;
   }
 
-  getCurrentWallet(): string | null {
-    return this.currentWallet;
+  getPublicKey(): string | null {
+    return this.publicKey;
   }
 
   getPrivateKey(): string | null {

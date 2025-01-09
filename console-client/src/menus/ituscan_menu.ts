@@ -1,23 +1,26 @@
-import inquirer from "inquirer";
-import { WalletService } from "../services/wallet_service";
-import WalletMenu from "./wallet_menu";
-import { Wallet } from "../types/types";
+import inquirer from 'inquirer';
+import { Transaction } from '../types/types';
+import { TransactionService } from '../services/transaction_service';
+import TransactionMenu from './transaction_menu';
 async function ItuScanMenu(): Promise<void> {
-  const walletService = new WalletService();
-  const wallets = await walletService.getAllWallets();
-  const publicKeys = wallets.map((wallet: Wallet) => wallet.public_key);
+  const transactionService = new TransactionService();
+  const transactions = await transactionService.getAllTransactions();
+  const transactionHashes = transactions.map((transaction: Transaction) => transaction.id);
 
-  const { choice } = await inquirer.prompt([{
-    type: "list",
-    name: "choice",
-    message: "Wallets",
-    choices: [...publicKeys, "Return Back"]
-  }]);
+  const { choice } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'choice',
+      message: 'Wallets',
+      choices: [...transactionHashes, 'Return Back'],
+    },
+  ]);
 
-  if (publicKeys.includes(choice)) {
-    await WalletMenu(choice);
+  if (transactionHashes.includes(choice)) {
+    await TransactionMenu(choice);
     await ItuScanMenu();
-  } else if (choice === "Return Back") {}
+  } else if (choice === 'Return Back') {
+  }
 }
 
-export default ItuScanMenu; 
+export default ItuScanMenu;

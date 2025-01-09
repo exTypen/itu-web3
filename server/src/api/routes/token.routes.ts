@@ -28,8 +28,8 @@ const tokenManager = new TokenManager();
  *                     type: object
  */
 router.get('/getall', async (req, res) => {
-    const tokens = await tokenManager.getTokens();
-    res.json(tokens);
+  const tokens = await tokenManager.getTokens();
+  res.json(tokens);
 });
 
 /**
@@ -55,8 +55,8 @@ router.get('/getall', async (req, res) => {
  *                   type: string
  */
 router.get('/getbyaddress/:address', async (req, res) => {
-    const token = await tokenManager.getTokenByAddress(req.params.address);
-    res.json(token);
+  const token = await tokenManager.getTokenByAddress(req.params.address);
+  res.json(token);
 });
 
 export default router;

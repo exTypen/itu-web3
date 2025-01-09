@@ -36,17 +36,17 @@ const walletManager = new WalletManager();
  *         description: Cüzdan getirilirken sunucu hatası.
  */
 router.get('/:publicKey', async (req: Request, res: Response) => {
-    try {
-        const wallet = await walletManager.getWalletByPublicKey(req.params.publicKey);
-        if (!wallet) {
-            return res.status(404).json({ error: 'Cüzdan bulunamadı' });
-        }
-        res.json(wallet);
-    } catch (error) {
-        res.status(500).json({ 
-            error: error instanceof Error ? error.message : 'Cüzdan getirilirken bir hata oluştu' 
-        });
+  try {
+    const wallet = await walletManager.getWalletByPublicKey(req.params.publicKey);
+    if (!wallet) {
+      return res.status(404).json({ error: 'Cüzdan bulunamadı' });
     }
+    res.json(wallet);
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Cüzdan getirilirken bir hata oluştu',
+    });
+  }
 });
 
 export default router;
