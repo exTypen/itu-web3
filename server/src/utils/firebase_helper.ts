@@ -7,7 +7,9 @@ import {
   where, 
   doc, 
   updateDoc, 
-  addDoc 
+  addDoc,
+  setDoc,
+  getDoc
 } from "firebase/firestore";
 import * as dotenv from "dotenv";
 import { Wallet, Pool } from "../types/types";
@@ -68,7 +70,7 @@ export class FirebaseHelper {
   async updateDocument(
     collectionName: string, 
     docId: string, 
-    data: Partial<Wallet | Pool>
+    data: Partial<any>
   ): Promise<boolean> {
     try {
       const docRef = doc(this.db, collectionName, docId);
@@ -82,7 +84,7 @@ export class FirebaseHelper {
 
   async addDocument(
     collectionName: string, 
-    data: Partial<Wallet | Pool>
+    data: Partial<any>
   ): Promise<boolean> {
     try {
       const collectionRef = collection(this.db, collectionName);
@@ -95,5 +97,31 @@ export class FirebaseHelper {
       console.error(`Error updating document in ${collectionName}:`, error);
       return false;
     }
+  }
+
+  async setDocument(
+    collectionName: string, 
+    data: Partial<any>,
+    customId?: string 
+  ): Promise<boolean> {
+    try {
+      const id = customId || crypto.randomUUID(); // Custom ID veya otomatik UUID
+      const docRef = doc(this.db, collectionName, id);
+      await setDoc(docRef, data);
+      return true;
+    } catch (error) {
+      console.error(`Error adding document to ${collectionName}:`, error);
+      return false;
+    }
+  }
+
+  async fetchDoc<T>(collection: string, docId: string): Promise<T | null> {
+    const docRef = doc(this.db, collection, docId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data() as T;
+    }
+    return null;
   }
 }

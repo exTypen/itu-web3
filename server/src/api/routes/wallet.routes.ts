@@ -28,16 +28,18 @@ const walletManager = new WalletManager();
  *       500:
  *         description: Cüzdanlar getirilirken sunucu hatası.
  */
+
+/*
 router.get('/', async (req, res) => {
     try {
-        const wallets = await walletManager.getAllWallets();
+        const wallets = await walletManager.getWallets();
         res.json(wallets);
     } catch (error) {
         res.status(500).json({ 
             error: error instanceof Error ? error.message : 'Cüzdanlar getirilirken bir hata oluştu' 
         });
     }
-});
+});*/
 
 /**
  * @openapi
@@ -107,6 +109,8 @@ router.get('/:publicKey', async (req: Request, res: Response) => {
  *       500:
  *         description: Cüzdan oluşturulurken sunucu hatası.
  */
+
+/*
 router.post('/', async (req: Request, res: Response) => {
     try {
         const walletData: Wallet = req.body;
@@ -126,5 +130,5 @@ router.post('/', async (req: Request, res: Response) => {
         });
     }
 });
-
+*/
 export default router;

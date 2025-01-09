@@ -84,9 +84,9 @@ router.get('/', async (req, res) => {
  *       500:
  *         description: Sunucu hatası.
  */
-router.get('/:id', async (req, res) => {
+router.get('/:address', async (req, res) => {
     try {
-        const pool = await poolManager.getPoolById(req.params.id);
+        const pool = await poolManager.getPoolByAddress(req.params.address);
         if (!pool) {
             return res.status(404).json({ error: 'Havuz bulunamadı' });
         }

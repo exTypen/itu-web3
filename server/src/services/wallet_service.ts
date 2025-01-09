@@ -10,12 +10,4 @@ export class WalletService {
   async getWalletByPublicKey(publicKey: string): Promise<Wallet | null> {
     return await this.firebaseHelper.fetchDocByQuery<Wallet>("wallets", "public_key", publicKey);
   }
-
-  async updateWallet(wallet: Wallet): Promise<boolean> {
-    return await this.firebaseHelper.updateDocument("wallets", wallet.id, wallet);
-  }
-
-  async addWallet(wallet: Partial<Wallet>): Promise<boolean> {
-    return await this.firebaseHelper.addDocument("wallets", wallet);
-  }
 }

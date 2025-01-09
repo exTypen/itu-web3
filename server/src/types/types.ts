@@ -1,18 +1,33 @@
 export interface Wallet {
-  id: string;
   public_key: string;
   balances: {
     [key: string]: number;
   };
 }
 
+export interface Token {
+  name: string;
+  symbol: string;
+}
+
 export interface Pool {
-  id: string;
   k: number;
-  token_1: {
-    [key: string]: number;
+  token1: {
+    address: string;
+    amount: number;
   };
-  token_2: {
-    [key: string]: number;
+  token2: {
+    address: string;
+    amount: number;
   };
 } 
+
+export interface Transaction {
+  from: string;
+  to: string;
+  amount: number;
+  timestamp: string;
+  token: string;
+  signature?: string;
+  type: string;
+}
