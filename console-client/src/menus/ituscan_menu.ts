@@ -1,0 +1,26 @@
+import inquirer from 'inquirer';
+import { Transaction } from '../types/types';
+import { TransactionService } from '../services/transaction_service';
+import TransactionMenu from './transaction_menu';
+async function ItuScanMenu(): Promise<void> {
+  const transactionService = new TransactionService();
+  const transactions = await transactionService.getAllTransactions();
+  const transactionHashes = transactions.map((transaction: Transaction) => transaction.id);
+
+  const { choice } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'choice',
+      message: 'Wallets',
+      choices: [...transactionHashes, 'Return Back'],
+    },
+  ]);
+
+  if (transactionHashes.includes(choice)) {
+    await TransactionMenu(choice);
+    await ItuScanMenu();
+  } else if (choice === 'Return Back') {
+  }
+}
+
+export default ItuScanMenu;
