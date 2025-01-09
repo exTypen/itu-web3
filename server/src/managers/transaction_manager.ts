@@ -1,121 +1,154 @@
-import { WalletService } from "../services/wallet_service";
-import { PoolService } from "../services/pool_service";
-import { HashUtils } from "../utils/hash_utils";
-import { Pool, Wallet } from "../types/types";
-
+import { Transaction, Wallet } from '../types/types';
+import { TransactionService } from '../services/transaction_service';
+import { SignatureUtils } from '../utils/signature_utils';
+import { WalletManager } from './wallet_manager';
+import { PoolManager } from './pool_manager';
+import { TokenManager } from './token_manager';
 export class TransactionManager {
-    private walletService = new WalletService();
-    private poolService = new PoolService();
-    async swap(privateKey: string, poolId: string, token: string, amount: number): Promise<{ wallet: Wallet; pool: Pool } | void> {
-        try {
-            const publicKey = HashUtils.sha256(privateKey);
-            const wallet = await this.walletService.getWalletByPublicKey(publicKey);
-            
-            if (!wallet) {
-                throw new Error("Wallet not found for the provided private key.");
-            }
+  private walletManager = new WalletManager();
+  private poolManager = new PoolManager();
+  private transactionService = new TransactionService();
+  private tokenManager = new TokenManager();
 
-            const pool = await this.poolService.getPoolById(poolId);
-            if (!pool) {
-                throw new Error("Pool not found for the provided pool ID.");
-            }
+  async getTransactions(): Promise<Transaction[]> {
+    let transactions = await this.transactionService.getTransactions();
+    return transactions;
+  }
 
-            const token1 = Object.keys(pool.token_1)[0];
-            const token2 = Object.keys(pool.token_2)[0];
-            const targetToken = token === token1 ? token2 : token1;
+  async getTransactionByHash(transactionHash: string): Promise<Transaction | null> {
+    return await this.transactionService.getTransactionByHash(transactionHash);
+  }
 
-            const token1Amount = pool.token_1[token1];
-            const token2Amount = pool.token_2[token2];
-            const k = pool.k;
+  private async addTransaction(transaction: Transaction): Promise<boolean> {
+    const txHash = '0x' + SignatureUtils.hashTransaction(transaction).toString('hex');
+    await this.transactionService.createTransaction(transaction, txHash);
+    return true;
+  }
 
-            if (!wallet.balances[token] || wallet.balances[token] < amount) {
-                throw new Error(`Insufficient ${token} balance.`);
-            }
+  async createTransaction(transaction: Transaction, signature: string): Promise<boolean> {
+    if (!signature) {
+      throw {
+        status: 400,
+        message: 'İmza gerekli',
+      };
+    }
+    const txHash = '0x' + SignatureUtils.hashTransaction(transaction).toString('hex');
+    const verified = SignatureUtils.verifyTransaction(transaction, signature, transaction.from);
+    if (!verified) {
+      throw {
+        status: 401,
+        message: 'İmza doğrulaması başarısız',
+      };
+    }
+    const wallet = await this.walletManager.getWalletByPublicKey(transaction.from);
+    if (wallet!.balances[transaction.token] < transaction.amount) {
+      throw {
+        status: 400,
+        message: 'Yetersiz bakiye',
+      };
+    }
+    if (transaction.type === 'swap') {
+      await this.swap(transaction);
+    } else if (transaction.type === 'add_liquidity') {
+      await this.addLiquidity(transaction);
+    }
+    return await this.transactionService.createTransaction(transaction, txHash);
+  }
 
-            const updatedTokenAmount = token === token1 ? token1Amount + amount : token2Amount + amount;
-            const updatedTargetTokenAmount = k / updatedTokenAmount;
-            const targetTokenDelta = (token === token1 ? token2Amount : token1Amount) - updatedTargetTokenAmount;
-
-            if (targetTokenDelta <= 0) {
-                throw new Error("Swap amount is too small to provide a meaningful target token output.");
-            }
-
-            wallet.balances[token] -= amount;
-            wallet.balances[targetToken] = (wallet.balances[targetToken] || 0) + targetTokenDelta;
-
-            if (token === token1) {
-                pool.token_1[token1] += amount;
-                pool.token_2[token2] = updatedTargetTokenAmount;
-            } else {
-                pool.token_2[token2] += amount;
-                pool.token_1[token1] = updatedTargetTokenAmount;
-            }
-
-            const walletUpdateResult = await this.walletService.updateWallet(wallet);
-            const poolUpdateResult = await this.poolService.updatePool(pool);
-
-            if (!walletUpdateResult || !poolUpdateResult) {
-                throw new Error("Failed to update wallet or pool after swap.");
-            }
-
-            console.log(
-                `Successfully swapped ${amount} ${token} for ${targetTokenDelta.toFixed(6)} ${targetToken}.`
-            );
-            return { wallet, pool };
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error("Error during swap operation:", error.message);
-            }
-            throw error;
-        }
+  private async swap(transaction: Transaction) {
+    const pool = await this.poolManager.getPoolByAddress(transaction.to);
+    if (!pool) {
+      throw {
+        status: 400,
+        message: 'Pool not found',
+      };
+    }
+    let targetToken = null;
+    let selectedToken = null;
+    if (pool.token1.address === transaction.token) {
+      targetToken = pool.token2;
+      selectedToken = pool.token1;
+    } else if (pool.token2.address === transaction.token) {
+      targetToken = pool.token1;
+      selectedToken = pool.token2;
     }
 
-    async addLiquidity(privateKey: string, poolId: string, token: string, amount: number): Promise<void> {
-        const publicKey = HashUtils.sha256(privateKey);
-        const wallet = await this.walletService.getWalletByPublicKey(publicKey);
-        
-        if (!wallet) {
-            throw new Error("Wallet not found for the provided private key.");
-        }
+    let targetTokenTempAmount = targetToken!.amount;
+    selectedToken!.amount = selectedToken!.amount + transaction.amount;
+    targetToken!.amount = pool.k / selectedToken!.amount;
 
-        const pool = await this.poolService.getPoolById(poolId);
-        if (!pool) {
-            throw new Error("Pool not found for the provided pool ID.");
-        }
+    const receivedTokenAmount = targetTokenTempAmount - targetToken!.amount;
 
-        const token1 = Object.keys(pool.token_1)[0];
-        const token2 = Object.keys(pool.token_2)[0];
-        const targetToken = token === token1 ? token2 : token1;
+    let receivingTransaction: Transaction = {
+      from: transaction.to,
+      to: transaction.from,
+      amount: receivedTokenAmount,
+      token: targetToken!.address,
+      type: 'swap',
+      timestamp: new Date().getTime().toString(),
+    };
 
-        const token1PoolAmount = pool.token_1[token1];
-        const token2PoolAmount = pool.token_2[token2];
-        const currentTokenRatio = token === token1 ? token2PoolAmount / token1PoolAmount : token1PoolAmount / token2PoolAmount;
-
-        const requiredTargetTokenAmount = amount * currentTokenRatio;
-
-        if (!wallet.balances[token] || wallet.balances[token] < amount || !wallet.balances[targetToken] || wallet.balances[targetToken] < requiredTargetTokenAmount) {
-            console.log("Insufficient token balance.");
-        } else {
-            let newK = 0;
-            if (Object.keys(pool.token_1)[0] === token) {
-                pool.token_1[token] += amount;
-                pool.token_2[targetToken] += requiredTargetTokenAmount;
-                newK = (token1PoolAmount + amount) * (token2PoolAmount + requiredTargetTokenAmount);
-            } else {
-                pool.token_2[token] += amount;
-                pool.token_1[targetToken] += requiredTargetTokenAmount;
-                newK = (token2PoolAmount + amount) * (token1PoolAmount + requiredTargetTokenAmount);
-            }
-            pool.k = newK;
-
-            await this.poolService.updatePool(pool);
-            wallet.balances[token] = wallet.balances[token] - amount;
-            wallet.balances[targetToken] = wallet.balances[targetToken] - requiredTargetTokenAmount;
-
-            await this.walletService.updateWallet(wallet);
-        }
-        console.log(
-            `Successfully added liquidity ${amount} ${token} for ${requiredTargetTokenAmount.toFixed(6)} ${targetToken}.`
-        );
+    if (pool.token1.address === transaction.token) {
+      pool.token1 = selectedToken!;
+    } else if (pool.token2.address === transaction.token) {
+      pool.token2 = selectedToken!;
     }
-} 
+    pool.k = pool.token1.amount * pool.token2.amount;
+
+    await this.addTransaction(receivingTransaction);
+    await this.poolManager.updatePool(pool, transaction.to);
+  }
+
+  private async addLiquidity(transaction: Transaction) {
+    const pool = await this.poolManager.getPoolByAddress(transaction.to);
+    if (!pool) {
+      throw {
+        status: 400,
+        message: 'Pool not found',
+      };
+    }
+    let otherTokenRequiredAmount = 0;
+    let requiredTokenAddress = '';
+    if (pool.token1.address === transaction.token) {
+      otherTokenRequiredAmount = (pool.token2.amount / pool.token1.amount) * transaction.amount;
+      pool.token1.amount = pool.token1.amount + transaction.amount;
+      requiredTokenAddress = pool.token2.address;
+    } else if (pool.token2.address === transaction.token) {
+      otherTokenRequiredAmount = (pool.token1.amount / pool.token2.amount) * transaction.amount;
+      pool.token2.amount = pool.token2.amount + transaction.amount;
+      requiredTokenAddress = pool.token1.address;
+    }
+    const requiredToken = await this.tokenManager.getTokenByAddress(requiredTokenAddress);
+    const wallet = await this.walletManager.getWalletByPublicKey(transaction.from);
+    if (wallet!.balances[requiredToken!.symbol] < otherTokenRequiredAmount) {
+      throw {
+        status: 400,
+        message: 'Yetersiz bakiye',
+      };
+    } else {
+      let transactionToAddLiquidity: Transaction = {
+        from: transaction.from,
+        to: transaction.to,
+        amount: otherTokenRequiredAmount,
+        token: requiredTokenAddress,
+        type: 'add_liquidity',
+        timestamp: new Date().getTime().toString(),
+      };
+
+      await this.addTransaction(transactionToAddLiquidity);
+    }
+
+    if (pool.token1.address === transaction.token) {
+      pool.token2.amount = pool.token2.amount + otherTokenRequiredAmount;
+    } else if (pool.token2.address === transaction.token) {
+      pool.token1.amount = pool.token1.amount + otherTokenRequiredAmount;
+    }
+
+    pool.k = pool.token1.amount * pool.token2.amount;
+    await this.poolManager.updatePool(pool, transaction.to);
+  }
+
+  async signTransaction(transaction: Transaction, privateKey: string): Promise<string> {
+    return SignatureUtils.signTransaction(transaction, privateKey);
+  }
+}

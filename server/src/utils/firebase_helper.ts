@@ -1,16 +1,18 @@
-import { initializeApp } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
-  getDocs, 
-  query, 
-  where, 
-  doc, 
-  updateDoc, 
-  addDoc 
-} from "firebase/firestore";
-import * as dotenv from "dotenv";
-import { Wallet, Pool } from "../types/types";
+import { initializeApp } from 'firebase/app';
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  addDoc,
+  setDoc,
+  getDoc,
+} from 'firebase/firestore';
+import * as dotenv from 'dotenv';
+import { Wallet, Pool } from '../types/types';
 
 dotenv.config();
 
@@ -31,7 +33,7 @@ export class FirebaseHelper {
     try {
       const collectionRef = collection(this.db, collectionName);
       const snapshot = await getDocs(collectionRef);
-      return snapshot.docs.map((doc) => ({
+      return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       })) as T[];
@@ -42,13 +44,13 @@ export class FirebaseHelper {
   }
 
   async fetchDocByQuery<T>(
-    collectionName: string, 
-    fieldName: string, 
+    collectionName: string,
+    fieldName: string,
     value: string
   ): Promise<T | null> {
     try {
       const collectionRef = collection(this.db, collectionName);
-      const q = query(collectionRef, where(fieldName, "==", value));
+      const q = query(collectionRef, where(fieldName, '==', value));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
@@ -63,12 +65,12 @@ export class FirebaseHelper {
       console.error(`Error fetching document from ${collectionName}:`, error);
       return null;
     }
-}
+  }
 
   async updateDocument(
-    collectionName: string, 
-    docId: string, 
-    data: Partial<Wallet | Pool>
+    collectionName: string,
+    docId: string,
+    data: Partial<any>
   ): Promise<boolean> {
     try {
       const docRef = doc(this.db, collectionName, docId);
@@ -80,10 +82,7 @@ export class FirebaseHelper {
     }
   }
 
-  async addDocument(
-    collectionName: string, 
-    data: Partial<Wallet | Pool>
-  ): Promise<boolean> {
+  async addDocument(collectionName: string, data: Partial<any>): Promise<boolean> {
     try {
       const collectionRef = collection(this.db, collectionName);
       const result = await addDoc(collectionRef, data);
@@ -95,5 +94,31 @@ export class FirebaseHelper {
       console.error(`Error updating document in ${collectionName}:`, error);
       return false;
     }
+  }
+
+  async setDocument(
+    collectionName: string,
+    data: Partial<any>,
+    customId?: string
+  ): Promise<boolean> {
+    try {
+      const id = customId || crypto.randomUUID(); // Custom ID veya otomatik UUID
+      const docRef = doc(this.db, collectionName, id);
+      await setDoc(docRef, data);
+      return true;
+    } catch (error) {
+      console.error(`Error adding document to ${collectionName}:`, error);
+      return false;
+    }
+  }
+
+  async fetchDoc<T>(collection: string, docId: string): Promise<T | null> {
+    const docRef = doc(this.db, collection, docId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data() as T;
+    }
+    return null;
   }
 }
