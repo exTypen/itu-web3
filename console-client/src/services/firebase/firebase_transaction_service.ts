@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { Wallet, Pool, Transaction } from '../types/types';
+import { Transaction } from '../../types/types';
 import dotenv from 'dotenv';
-import auth_manager from '../managers/auth_manager';
-import { SignatureUtils } from '../utils/signature_utils';
+import { ITransactionService } from '../interfaces/transaction_service';
 dotenv.config();
 
-export class TransactionService {
+export class FirebaseTransactionService implements ITransactionService {
   private apiUrl: string;
 
   constructor() {
@@ -32,9 +31,9 @@ export class TransactionService {
     }
   }
 
-  async createTransaction(body: any): Promise<boolean> {
+  async swap(body: any): Promise<boolean> {
     try {
-      const response = await axios.post(`${this.apiUrl}/api/transactions/create`, body);
+      const response = await axios.post(`${this.apiUrl}/api/transactions/swap`, body);
       return response.data;
     } catch (error) {
       console.error('İşlem oluşturulurken hata oluştu:', error);
@@ -42,21 +41,12 @@ export class TransactionService {
     }
   }
 
-  async addLiquidity(
-    privateKey: string,
-    poolId: string,
-    token: string,
-    amount: number
-  ): Promise<void> {
+  async addLiquidity(body: any): Promise<boolean> {
     try {
-      await axios.post(`${this.apiUrl}/api/transactions/addliquidity`, {
-        privateKey,
-        poolId,
-        token,
-        amount,
-      });
+      const response = await axios.post(`${this.apiUrl}/api/transactions/add_liquidity`, body);
+      return response.data;
     } catch (error) {
-      console.error('Likidite ekleme işlemi sırasında hata oluştu:', error);
+      console.error('İşlem oluşturulurken hata oluştu:', error);
       throw error;
     }
   }

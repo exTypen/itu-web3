@@ -1,8 +1,8 @@
-import { TransactionService } from '../services/transaction_service';
+import ServiceProvider from '../providers/service_provider';
 import chalk from 'chalk';
 
 async function TransactionMenu(hash: string): Promise<void> {
-  const transactionService = new TransactionService();
+  const transactionService = ServiceProvider.getTransactionService();
   const transaction = await transactionService.getTransactionByHash(hash);
   if (hash) {
     console.log('------------------------------------------------');

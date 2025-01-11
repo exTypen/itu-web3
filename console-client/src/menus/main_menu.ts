@@ -5,10 +5,25 @@ import WalletMenu from './wallet_menu';
 import PoolsMenu from './pools_menu';
 
 async function MainMenu(): Promise<void> {
+  if (!authManager.isLoggedIn() && authManager.hasStoredWallet()) {
+    const { password } = await inquirer.prompt([
+      {
+        type: 'password',
+        name: 'password',
+        message: 'Cüzdanınızı açmak için şifrenizi girin:',
+      },
+    ]);
+
+    const success = await authManager.loadWallet(password);
+    if (!success) {
+      console.log('Hatalı şifre veya bozuk veri!');
+    }
+  }
+
   if (authManager.isLoggedIn()) {
-    console.log('\nConnected Wallet: ' + authManager.getPublicKey());
+    console.log('\nBağlı Cüzdan: ' + authManager.getPublicKey());
   } else {
-    console.log('Wallet not connected');
+    console.log('Cüzdan bağlı değil');
   }
 
   console.log(
@@ -47,15 +62,23 @@ async function MainMenu(): Promise<void> {
     await PoolsMenu();
     await MainMenu();
   } else if (choice === 'Initialize Wallet') {
-    const { privateKey } = await inquirer.prompt([
+    const { privateKey, password } = await inquirer.prompt([
       {
         type: 'input',
         name: 'privateKey',
-        message: 'Enter your private key:',
+        message: 'Private key\'inizi girin:',
       },
+      {
+        type: 'password',
+        name: 'password',
+        message: 'Cüzdanınız için bir şifre belirleyin:',
+      }
     ]);
 
-    await authManager.setWallet(privateKey);
+    const success = await authManager.setWallet(privateKey, password);
+    if (!success) {
+      console.log('Cüzdan oluşturulurken bir hata oluştu. Lütfen private key\'i kontrol edin.');
+    }
     await MainMenu();
   } else if (choice === 'Disconnect') {
     authManager.disconnect();

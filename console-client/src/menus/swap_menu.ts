@@ -1,13 +1,11 @@
 import inquirer from 'inquirer';
 import authManager from '../managers/auth_manager';
-import { PoolService } from '../services/pool_service';
-import { TransactionService } from '../services/transaction_service';
-import { TokenService } from '../services/token_service';
+import ServiceProvider from '../providers/service_provider';
 import { SignatureUtils } from '../utils/signature_utils';
 async function SwapMenu(pool_id: string): Promise<void> {
-  const poolService = new PoolService();
-  const tokenService = new TokenService();
-  const transactionService = new TransactionService();
+  const poolService = ServiceProvider.getPoolService();
+  const tokenService = ServiceProvider.getTokenService();
+  const transactionService = ServiceProvider.getTransactionService();
   const pool = await poolService.getPoolById(pool_id);
 
   const token1 = await tokenService.getTokenByAddress(pool.token1.address);
@@ -47,7 +45,7 @@ async function SwapMenu(pool_id: string): Promise<void> {
       transaction: transaction,
       signature: SignatureUtils.signTransaction(transaction, authManager.getPrivateKey()!),
     };
-    await transactionService.createTransaction(body);
+    await transactionService.swap(body);
   } else if (choice === 2) {
     const { amount } = await inquirer.prompt([
       {
@@ -68,7 +66,7 @@ async function SwapMenu(pool_id: string): Promise<void> {
       transaction: transaction,
       signature: SignatureUtils.signTransaction(transaction, authManager.getPrivateKey()!),
     };
-    await transactionService.createTransaction(body);
+    await transactionService.swap(body);
   }
 }
 

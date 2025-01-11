@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { Token } from '../types/types';
+import { Token } from '../../types/types';
 import dotenv from 'dotenv';
+import { ITokenService } from '../interfaces/token_service';
 dotenv.config();
 
-export class TokenService {
+export class FirebaseTokenService implements ITokenService {
   private apiUrl: string;
 
   constructor() {

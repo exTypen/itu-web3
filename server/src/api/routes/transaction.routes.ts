@@ -64,12 +64,23 @@ router.get('/getbyhash/:hash', async (req, res) => {
  *           schema:
  *             $ref: '#/components/schemas/Transaction'
  */
-router.post('/create', async (req, res) => {
+router.post('/swap', async (req, res) => {
   try {
-    const result = await transactionManager.createTransaction(
+    const result = await transactionManager.swap(
       req.body.transaction,
       req.body.signature
     );
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(error.status || 500).json({
+      message: error.message || 'Beklenmeyen bir hata oluştu',
+    });
+  }
+});
+
+router.post('/add_liquidity', async (req, res) => {
+  try {
+    const result = await transactionManager.addLiquidity(req.body.transaction, req.body.signature);
     res.status(200).json(result);
   } catch (error: any) {
     res.status(error.status || 500).json({
