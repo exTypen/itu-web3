@@ -110,7 +110,7 @@ class AuthManager {
   }
 
   getPrivateKey(): string | null {
-    return this.privateKey;
+    return this.privateKey ? this.privateKey.replace(/^0x/, '') : null;
   }
 }
 
