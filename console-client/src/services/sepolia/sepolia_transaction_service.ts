@@ -2,6 +2,8 @@ import { ethers } from 'ethers';
 import AuthManager from '../../managers/auth_manager';
 import { ITransactionService } from '../interfaces/transaction_service';
 import { Transaction } from '../../types/types';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const POOL_ADDRESS = "0x7e05617031d46D134B44b31dBB741956bDC4AcE5";
 
@@ -21,7 +23,7 @@ export class SepoliaTransactionService implements ITransactionService {
     private provider: ethers.Provider;
 
     constructor() {
-        this.provider = new ethers.JsonRpcProvider('https://sepolia.infura.io/v3/ca7d292e8ee143709e66cb9f47010744');
+        this.provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`);
     }
 
     private getSigner(): ethers.Wallet {

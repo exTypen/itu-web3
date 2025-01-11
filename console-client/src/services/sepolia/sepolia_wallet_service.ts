@@ -1,6 +1,9 @@
 import { IWalletService } from '../interfaces/wallet_service';
 import { ethers } from 'ethers';
 import { Wallet } from '../../types/types';
+import dotenv from 'dotenv';
+dotenv.config();
+
 export class SepoliaWalletService implements IWalletService {
     private provider: ethers.JsonRpcProvider;
 
@@ -19,12 +22,12 @@ export class SepoliaWalletService implements IWalletService {
             ];
             
             // Token kontrat adresleri
-            const token1Address = "0x36c29d9C60969C0b5dbb9E49c616feA4737276fC";
-            const token2Address = "0x714247e799aA19bD75ea55dAC2d1DDE7641a0321";
+            const token1Address = process.env.SEPOLIA_TOKENA_ADDRESS;
+            const token2Address = process.env.SEPOLIA_TOKENB_ADDRESS;
             
             // Her iki token için kontratları oluşturuyoruz
-            const token1Contract = new ethers.Contract(token1Address, tokenAbi, this.provider);
-            const token2Contract = new ethers.Contract(token2Address, tokenAbi, this.provider);
+            const token1Contract = new ethers.Contract(token1Address!, tokenAbi, this.provider);
+            const token2Contract = new ethers.Contract(token2Address!, tokenAbi, this.provider);
             
             // Bakiye, decimal ve symbol bilgilerini paralel olarak alıyoruz
             const [

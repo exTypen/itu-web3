@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 import { Token } from '../../types/types';
 import { ITokenService } from '../interfaces/token_service';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const ERC20_ABI = [
     "function name() view returns (string)",
@@ -11,7 +13,7 @@ export class SepoliaTokenService implements ITokenService {
     private provider: ethers.Provider;
     
     constructor() {
-        this.provider = new ethers.JsonRpcProvider('https://sepolia.infura.io/v3/ca7d292e8ee143709e66cb9f47010744');
+        this.provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`);
     }
 
     async getTokenByAddress(address: string): Promise<Token> {
