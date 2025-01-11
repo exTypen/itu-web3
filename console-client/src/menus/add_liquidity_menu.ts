@@ -1,13 +1,12 @@
 import inquirer from 'inquirer';
-import { PoolService } from '../services/pool_service';
 import authManager from '../managers/auth_manager';
-import { TransactionService } from '../services/transaction_service';
-import { TokenService } from '../services/token_service';
 import { SignatureUtils } from '../utils/signature_utils';
+import ServiceProvider from '../providers/service_provider';
+
 async function AddLiquidityMenu(pool_id: string): Promise<void> {
-  const poolService = new PoolService();
-  const transactionService = new TransactionService();
-  const tokenService = new TokenService();
+  const poolService = ServiceProvider.getPoolService();
+  const transactionService = ServiceProvider.getTransactionService();
+  const tokenService = ServiceProvider.getTokenService();
   const pool = await poolService.getPoolById(pool_id);
   const token1 = await tokenService.getTokenByAddress(pool.token1.address);
   const token2 = await tokenService.getTokenByAddress(pool.token2.address);
@@ -48,7 +47,7 @@ async function AddLiquidityMenu(pool_id: string): Promise<void> {
       transaction: transaction,
       signature: SignatureUtils.signTransaction(transaction, authManager.getPrivateKey()!),
     };
-    await transactionService.createTransaction(body);
+    await transactionService.addLiquidity(body);
   } else if (choice === 2) {
     const { amount } = await inquirer.prompt([
       {
@@ -70,7 +69,7 @@ async function AddLiquidityMenu(pool_id: string): Promise<void> {
       transaction: transaction,
       signature: SignatureUtils.signTransaction(transaction, authManager.getPrivateKey()!),
     };
-    await transactionService.createTransaction(body);
+    await transactionService.addLiquidity(body);
   }
 }
 

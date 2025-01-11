@@ -24,8 +24,7 @@ export class TransactionManager {
     await this.transactionService.createTransaction(transaction, txHash);
     return true;
   }
-
-  async createTransaction(transaction: Transaction, signature: string): Promise<boolean> {
+  async swap(transaction: Transaction, signature: string) {
     if (!signature) {
       throw {
         status: 400,
@@ -47,15 +46,6 @@ export class TransactionManager {
         message: 'Yetersiz bakiye',
       };
     }
-    if (transaction.type === 'swap') {
-      await this.swap(transaction);
-    } else if (transaction.type === 'add_liquidity') {
-      await this.addLiquidity(transaction);
-    }
-    return await this.transactionService.createTransaction(transaction, txHash);
-  }
-
-  private async swap(transaction: Transaction) {
     const pool = await this.poolManager.getPoolByAddress(transaction.to);
     if (!pool) {
       throw {
@@ -88,6 +78,8 @@ export class TransactionManager {
       timestamp: new Date().getTime().toString(),
     };
 
+    transaction.type = 'swap';
+
     if (pool.token1.address === transaction.token) {
       pool.token1 = selectedToken!;
     } else if (pool.token2.address === transaction.token) {
@@ -97,9 +89,31 @@ export class TransactionManager {
 
     await this.addTransaction(receivingTransaction);
     await this.poolManager.updatePool(pool, transaction.to);
+    return await this.transactionService.createTransaction(transaction, txHash); 
   }
 
-  private async addLiquidity(transaction: Transaction) {
+  async addLiquidity(transaction: Transaction, signature: string) {
+    if (!signature) {
+      throw {
+        status: 400,
+        message: 'İmza gerekli',
+      };
+    }
+    const txHash = '0x' + SignatureUtils.hashTransaction(transaction).toString('hex');
+    const verified = SignatureUtils.verifyTransaction(transaction, signature, transaction.from);
+    if (!verified) {
+      throw {
+        status: 401,
+        message: 'İmza doğrulaması başarısız',
+      };
+    }
+    const wallet = await this.walletManager.getWalletByPublicKey(transaction.from);
+    if (wallet!.balances[transaction.token] < transaction.amount) {
+      throw {
+        status: 400,
+        message: 'Yetersiz bakiye',
+      };
+    }
     const pool = await this.poolManager.getPoolByAddress(transaction.to);
     if (!pool) {
       throw {
@@ -119,7 +133,6 @@ export class TransactionManager {
       requiredTokenAddress = pool.token1.address;
     }
     const requiredToken = await this.tokenManager.getTokenByAddress(requiredTokenAddress);
-    const wallet = await this.walletManager.getWalletByPublicKey(transaction.from);
     if (wallet!.balances[requiredToken!.symbol] < otherTokenRequiredAmount) {
       throw {
         status: 400,
@@ -135,6 +148,8 @@ export class TransactionManager {
         timestamp: new Date().getTime().toString(),
       };
 
+      transaction.type = 'add_liquidity';
+
       await this.addTransaction(transactionToAddLiquidity);
     }
 
@@ -146,6 +161,7 @@ export class TransactionManager {
 
     pool.k = pool.token1.amount * pool.token2.amount;
     await this.poolManager.updatePool(pool, transaction.to);
+    return await this.transactionService.createTransaction(transaction, txHash);
   }
 
   async signTransaction(transaction: Transaction, privateKey: string): Promise<string> {

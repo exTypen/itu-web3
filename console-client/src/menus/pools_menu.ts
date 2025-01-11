@@ -1,11 +1,10 @@
 import inquirer from 'inquirer';
-import { PoolService } from '../services/pool_service';
-import { TokenService } from '../services/token_service';
+import ServiceProvider from '../providers/service_provider';
 import PoolMenu from './pool_menu';
 
 async function PoolsMenu(): Promise<void> {
-  const poolService = new PoolService();
-  const tokenService = new TokenService();
+  const poolService = ServiceProvider.getPoolService();
+  const tokenService = ServiceProvider.getTokenService();
   const pools = await poolService.getPools();
   const poolsChoices = await Promise.all(
     pools.map(async (pool) => ({

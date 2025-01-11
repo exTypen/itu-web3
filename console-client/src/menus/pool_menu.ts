@@ -1,15 +1,13 @@
 import inquirer from 'inquirer';
-import { PoolService } from '../services/pool_service';
 import SwapMenu from './swap_menu';
 import authManager from '../managers/auth_manager';
 import chalk from 'chalk';
 import AddLiquidityMenu from './add_liquidity_menu';
-import { TokenService } from '../services/token_service';
+import ServiceProvider from '../providers/service_provider';
 
 async function PoolMenu(pool_id: string): Promise<void> {
-  const poolService = new PoolService();
-  const tokenService = new TokenService();
-  const pool = await poolService.getPoolById(pool_id);
+  const poolService = ServiceProvider.getPoolService();
+  const tokenService = ServiceProvider.getTokenService();
 
   const choices: any[] = [
     { name: 'Swap', disabled: !authManager.isLoggedIn() },
