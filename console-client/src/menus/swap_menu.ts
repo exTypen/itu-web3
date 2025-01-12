@@ -2,6 +2,8 @@ import inquirer from 'inquirer';
 import authManager from '../managers/auth_manager';
 import ServiceProvider from '../providers/service_provider';
 import { SignatureUtils } from '../utils/signature_utils';
+import { printHeader } from '../utils/header_utils';
+
 async function SwapMenu(pool_id: string): Promise<void> {
   const poolService = ServiceProvider.getPoolService();
   const tokenService = ServiceProvider.getTokenService();
@@ -13,6 +15,8 @@ async function SwapMenu(pool_id: string): Promise<void> {
 
   if (!pool) return;
 
+  console.clear();
+  printHeader();
   const { choice } = await inquirer.prompt<{ choice: number | string }>([
     {
       type: 'list',

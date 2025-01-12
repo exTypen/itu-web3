@@ -2,7 +2,7 @@ import inquirer from 'inquirer';
 import authManager from '../managers/auth_manager';
 import { SignatureUtils } from '../utils/signature_utils';
 import ServiceProvider from '../providers/service_provider';
-
+import { printHeader } from '../utils/header_utils';
 async function AddLiquidityMenu(pool_id: string): Promise<void> {
   const poolService = ServiceProvider.getPoolService();
   const transactionService = ServiceProvider.getTransactionService();
@@ -13,6 +13,8 @@ async function AddLiquidityMenu(pool_id: string): Promise<void> {
 
   if (!pool) return;
 
+  console.clear();
+  printHeader();
   const { choice } = await inquirer.prompt([
     {
       type: 'list',

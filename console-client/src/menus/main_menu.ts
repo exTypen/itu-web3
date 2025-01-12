@@ -4,8 +4,13 @@ import ItuScanMenu from './ituscan_menu';
 import WalletMenu from './wallet_menu';
 import PoolsMenu from './pools_menu';
 import ServiceProvider from '../providers/service_provider';
+import chalk from 'chalk';
+import { printHeader } from '../utils/header_utils';
 
 async function MainMenu(): Promise<void> {
+  console.clear();
+  printHeader();
+
   if (!authManager.isLoggedIn() && authManager.hasStoredWallet()) {
     const { password } = await inquirer.prompt([
       {
@@ -18,18 +23,11 @@ async function MainMenu(): Promise<void> {
     const success = await authManager.loadWallet(password);
     if (!success) {
       console.log('Invalid password or corrupted data!');
+    } else {
+      console.clear();
+      printHeader();
     }
   }
-
-  if (authManager.isLoggedIn()) {
-    console.log('\nConnected Wallet: ' + authManager.getPublicKey());
-  } else {
-    console.log('Wallet not connected');
-  }
-
-  console.log(
-    '----------------------------------------------------------------------------------------'
-  );
 
   const choices: any[] = [
     { name: 'My Balances', disabled: !authManager.isLoggedIn() },

@@ -1,8 +1,12 @@
 import inquirer from 'inquirer';
 import ServiceProvider from '../providers/service_provider';
 import PoolMenu from './pool_menu';
+import { printHeader } from '../utils/header_utils';
 
 async function PoolsMenu(): Promise<void> {
+  console.clear();
+  printHeader();
+  
   const poolService = ServiceProvider.getPoolService();
   const tokenService = ServiceProvider.getTokenService();
   const pools = await poolService.getPools();

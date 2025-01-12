@@ -5,8 +5,6 @@ import { Transaction } from '../../types/types';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const POOL_ADDRESS = "0x7e05617031d46D134B44b31dBB741956bDC4AcE5";
-
 const POOL_ABI = [
     "function addLiquidity(uint256 amountA, uint256 amountB) external returns (bool)",
     "function swap(address inputToken, uint256 inputAmount) external",
@@ -42,7 +40,7 @@ export class SepoliaTransactionService implements ITransactionService {
 
     private getPoolContract(): ethers.Contract {
         const signer = this.getSigner();
-        return new ethers.Contract(POOL_ADDRESS, POOL_ABI, signer);
+        return new ethers.Contract(process.env.SEPOLIA_POOL_ADDRESS!, POOL_ABI, signer);
     }
 
     private async approveToken(tokenAddress: string, amount: bigint): Promise<void> {
@@ -51,7 +49,7 @@ export class SepoliaTransactionService implements ITransactionService {
             const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
             
             console.log(`Approving ${amount.toString()} tokens at address ${tokenAddress}`);
-            const tx = await tokenContract.approve(POOL_ADDRESS, amount, {
+            const tx = await tokenContract.approve(process.env.SEPOLIA_POOL_ADDRESS!, amount, {
                 gasLimit: 100000 // Gas limitini manuel olarak ayarla
             });
             
@@ -85,6 +83,7 @@ export class SepoliaTransactionService implements ITransactionService {
 
     async addLiquidity(body: any): Promise<boolean> {
         try {
+            
             const poolContract = this.getPoolContract();
             
             const [tokenA, tokenB] = await Promise.all([
@@ -92,7 +91,7 @@ export class SepoliaTransactionService implements ITransactionService {
                 poolContract.tokenB()
             ]);
 
-            // Tek bir çağrıda her iki rezervi al
+            // Rezervleri al
             const [reserveA, reserveB] = await poolContract.getReserves();
 
             const sendedAmount = body.transaction.amount;
@@ -100,27 +99,26 @@ export class SepoliaTransactionService implements ITransactionService {
 
             let amountA: bigint, amountB: bigint;
 
+            // Kullanıcının gönderdiği token'a göre diğer token miktarını hesapla
             if(sendedToken === tokenA) {
                 amountA = ethers.parseUnits(sendedAmount.toString(), 6); // USDT için 6 decimal
-                // (reserveB * amountA) / reserveA formülü ile oranı koru
-                amountB = (reserveB * amountA) / reserveA;
+                // Havuz oranını koru: amountA * reserveB = amountB * reserveA
+                amountB = (amountA * reserveB) / reserveA;
             } else if(sendedToken === tokenB) {
                 amountB = ethers.parseUnits(sendedAmount.toString(), 18); // ARI için 18 decimal
-                // (reserveA * amountB) / reserveB formülü ile oranı koru
-                amountA = (reserveA * amountB) / reserveB;
+                // Havuz oranını koru: amountA * reserveB = amountB * reserveA
+                amountA = (amountB * reserveA) / reserveB;
             } else {
                 throw new Error("Geçersiz token adresi");
             }
 
-            // Token onaylarını al
             await this.approveToken(tokenA, amountA);
             await this.approveToken(tokenB, amountB);
 
             // Likidite ekle
             const tx = await poolContract.addLiquidity(
                 amountA,
-                amountB,
-                { gasLimit: 500000 }
+                amountB
             );
 
             await tx.wait();

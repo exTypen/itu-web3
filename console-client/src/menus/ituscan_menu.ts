@@ -2,7 +2,12 @@ import inquirer from 'inquirer';
 import { Transaction } from '../types/types';
 import ServiceProvider from '../providers/service_provider';
 import TransactionMenu from './transaction_menu';
+import { printHeader } from '../utils/header_utils';
+
 async function ItuScanMenu(): Promise<void> {
+  console.clear();
+  printHeader();
+  
   const transactionService = ServiceProvider.getTransactionService();
   const transactions = await transactionService.getAllTransactions();
   const transactionHashes = transactions.map((transaction: Transaction) => transaction.id);

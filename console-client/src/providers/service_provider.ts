@@ -55,6 +55,10 @@ class ServiceProvider {
   static getWalletService(): IWalletService {
     return this.walletService;
   }
+
+  static getChain(): string {
+    return this.chain;
+  }
 }
 export default ServiceProvider;
 
