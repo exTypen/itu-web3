@@ -1,48 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import COINS from './coins';
 import './main.css';
-import fetchPrice from '../utils/priceUtils';
 
 function UniswapLike() {
   const [sellToken, setSellToken] = useState(COINS[0].symbol);
   const [buyToken, setBuyToken] = useState("");
   const [sellAmount, setSellAmount] = useState("");
   const [buyAmount, setBuyAmount] = useState("");
-  const [prices, setPrices] = useState({});
-  const [loadingPrices, setLoadingPrices] = useState(true);
-
-  useEffect(() => {
-    async function getPrices() {
-      setLoadingPrices(true);
-      const newPrices = {};
-      for (const coin of COINS) {
-        const price = await fetchPrice(coin);
-        if (price) {
-          newPrices[coin.symbol] = price;
-        }
-      }
-      setPrices(newPrices);
-      setLoadingPrices(false);
-    }
-
-    getPrices();
-  }, []);
-
-  useEffect(() => {
-    calculateBuyAmount();
-  }, [sellToken, buyToken, sellAmount, prices, loadingPrices]);
-
-  const calculateBuyAmount = () => {
-    if (loadingPrices) return;
-
-    if (sellAmount && prices[sellToken] && prices[buyToken]) {
-      const sellValue = parseFloat(sellAmount) * prices[sellToken];
-      const buyValue = sellValue / prices[buyToken];
-      setBuyAmount(buyValue.toFixed(6));
-    } else {
-      setBuyAmount("");
-    }
-  };
 
   return (
     <div className="middle-container">
