@@ -9,7 +9,7 @@ export class SepoliaWalletService implements IWalletService {
 
     constructor() {
         // Sepolia test ağına bağlanıyoruz
-        this.provider = new ethers.JsonRpcProvider('https://sepolia.infura.io/v3/ca7d292e8ee143709e66cb9f47010744');
+        this.provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`);
     }
 
     async getWalletByPublicKey(publicKey: string): Promise<Wallet> {

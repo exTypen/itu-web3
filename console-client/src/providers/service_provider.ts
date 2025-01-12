@@ -19,24 +19,25 @@ class ServiceProvider {
   private static tokenService: ITokenService;
   private static transactionService: ITransactionService;
   private static walletService: IWalletService;
+  private static chain: string;
 
-  private static initializeServices(isFirebase: boolean) {
-    if (isFirebase) {
+  private static initializeServices() {
+    if (this.chain === 'firebase') {
       this.poolService = new FirebasePoolService();
       this.tokenService = new FirebaseTokenService();
       this.transactionService = new FirebaseTransactionService();
       this.walletService = new FirebaseWalletService();
-    } else {
+    } else if (this.chain === 'sepolia') {
       this.poolService = new SepoliaPoolService();
       this.tokenService = new SepoliaTokenService();
       this.transactionService = new SepoliaTransactionService();
       this.walletService = new SepoliaWalletService();
     }
-    // Buraya ileride başka servis sağlayıcıları eklenebilir (else if blokları ile)
   }
 
-  static setServices(isFirebase: boolean): void {
-    this.initializeServices(isFirebase);
+  static setChain(chain: string): void {
+    this.chain = chain;
+    this.initializeServices();
   }
 
   static getPoolService(): IPoolService {

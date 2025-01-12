@@ -2,13 +2,10 @@
 import MainMenu from './menus/main_menu';
 import ServiceProvider from './providers/service_provider';
 
-// Komut satırı argümanlarını kontrol et
-const args = process.argv;
-const isFirebase = args.includes('firebase');
 
 // MainMenu fonksiyonunu, seçilen altyapı ile çalışacak şekilde düzenle
 async function startApp(): Promise<void> {
-  ServiceProvider.setServices(isFirebase);
+  ServiceProvider.setChain('sepolia');
   await MainMenu();
 }
 
