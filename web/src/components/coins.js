@@ -1,41 +1,21 @@
 // src/coins.js
 const COINS = [
-    {
-      name: "Ethereum",
-      symbol: "ETH",
-      coingeckoId: "ethereum",
-      address: "0x...",
-      icon: "/eth-icon.png",
-      price: null,
-      balance: null,
-    },
-    {
-      name: "Litecoin",
-      symbol: "LTC",
-      coingeckoId: "litecoin",
-      address: "0x...",
-      icon: "/ltc-icon.png",
-      price: null,
-      balance: null,
-    },
-    {
-      name: "Tether",
-      symbol: "USDT",
-      coingeckoId: "tether",
-      address: "0x...",
-      icon: "/usdt-icon.png",
-      price: null,
-      balance: null,
-    },
-      {
-        name: "Binance USD",
-        symbol: "BUSD",
-        coingeckoId: "binance-usd",
-        address: "0x...",
-        icon: "/busd-icon.png",
-        price: null,
-        balance: null,
-      },
-  ];
-  
-  export default COINS;
+  {
+    name: "ARI",
+    symbol: "ARI",
+    address: "0x36c29d9C60969C0b5dbb9E49c616feA4737276fC", // Sepolia
+    icon: "/ari-icon.png", // Replace with your actual icon path
+    price: null,
+    balance: null,
+  },
+  {
+    name: "Tether",
+    symbol: "USDT",
+    address: "0x714247e799aA19bD75ea55dAC2d1DDE7641a0321", // Sepolia
+    icon: "/usdt-icon.png", // Replace with your actual icon path
+    price: null,
+    balance: null,
+  },
+];
+
+export default COINS;

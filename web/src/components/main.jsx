@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import COINS from './coins';
+import COINS from './coins'; // Make sure this file exists and exports an array of coin objects
 import { useWalletService } from '../services/walletService';
-import './main.css';
+import './main.css'; // Make sure this file exists for styling
 
 function UniswapLike() {
-  const { 
-    signer, 
-    network, 
-    walletAddress, 
-    initialized, 
-    connectToWallet, 
-    disconnectWallet 
+  const {
+    signer,
+    network,
+    walletAddress,
+    initialized,
+    connectToWallet,
+    disconnectWallet,
+    ariBalance,
+    usdtBalance,
   } = useWalletService();
 
   const [sellToken, setSellToken] = useState(COINS[0].symbol);
@@ -28,7 +30,7 @@ function UniswapLike() {
 
   useEffect(() => {
     if (sellAmount && sellToken && buyToken) {
-      const mockRate = 0.95;
+      const mockRate = 0.95; // Replace with actual rate calculation
       setBuyAmount((sellAmount * mockRate).toFixed(2));
     }
   }, [sellAmount, sellToken, buyToken]);
@@ -55,6 +57,10 @@ function UniswapLike() {
       <main>
         <div className="swap-box">
           <h2>Arı gibi çalışıyoruz, bize güvenebilirsiniz.</h2>
+          <div className="balance-box">
+            <p>ARI Balance: {ariBalance !== null ? ariBalance : "Loading..."}</p>
+            <p>USDT Balance: {usdtBalance !== null ? usdtBalance : "Loading..."}</p>
+          </div>
           <div className="sell-section">
             <label htmlFor="sell-amount">Sell</label>
             <input
@@ -92,8 +98,11 @@ function UniswapLike() {
               ))}
             </select>
           </div>
-          <button className="get-started-button" disabled={!initialized || !sellAmount || !buyAmount}>
-            Swap (Disabled)
+          <button
+            className="get-started-button"
+            disabled={!initialized || !sellAmount || !buyAmount || !buyToken} // Added buyToken check
+          >
+            Swap {buyToken ? `(${sellToken} to ${buyToken})` : ''}
           </button>
         </div>
       </main>
