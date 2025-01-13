@@ -1,12 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import COINS from './coins';
+import { useWalletService } from '../services/walletService';
 import './main.css';
 
 function UniswapLike() {
+  const { 
+    signer, 
+    network, 
+    walletAddress, 
+    initialized, 
+    connectToWallet, 
+    disconnectWallet 
+  } = useWalletService();
+
   const [sellToken, setSellToken] = useState(COINS[0].symbol);
   const [buyToken, setBuyToken] = useState("");
   const [sellAmount, setSellAmount] = useState("");
   const [buyAmount, setBuyAmount] = useState("");
+
+  const handleConnectWallet = async () => {
+    await connectToWallet();
+  };
+
+  const handleDisconnectWallet = () => {
+    disconnectWallet();
+  };
+
+  useEffect(() => {
+    if (sellAmount && sellToken && buyToken) {
+      const mockRate = 0.95;
+      setBuyAmount((sellAmount * mockRate).toFixed(2));
+    }
+  }, [sellAmount, sellToken, buyToken]);
 
   return (
     <div className="middle-container">
@@ -17,13 +42,19 @@ function UniswapLike() {
             <input type="text" placeholder="Search tokens" />
           </div>
           <div className="actions">
-            <button>Connect Wallet</button>
+            {initialized && walletAddress ? (
+              <button onClick={handleDisconnectWallet}>
+                Disconnect ({walletAddress.slice(0, 6)}...{walletAddress.slice(-4)})
+              </button>
+            ) : (
+              <button onClick={handleConnectWallet}>Connect Wallet</button>
+            )}
           </div>
         </div>
       </header>
       <main>
         <div className="swap-box">
-          <h2>Arı gibi çalışıyoruz bize güvenebilirsiniz.</h2>
+          <h2>Arı gibi çalışıyoruz, bize güvenebilirsiniz.</h2>
           <div className="sell-section">
             <label htmlFor="sell-amount">Sell</label>
             <input
@@ -61,7 +92,9 @@ function UniswapLike() {
               ))}
             </select>
           </div>
-          <button className="get-started-button">Swap (Disabled)</button>
+          <button className="get-started-button" disabled={!initialized || !sellAmount || !buyAmount}>
+            Swap (Disabled)
+          </button>
         </div>
       </main>
     </div>
