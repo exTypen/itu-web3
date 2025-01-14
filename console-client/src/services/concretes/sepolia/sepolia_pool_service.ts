@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { Pool } from '../../types/types';
-import { IPoolService } from '../interfaces/pool_service';
+import { Pool } from '../../../types/types';
+import { IPoolService } from '../../interfaces/pool_service';
 import { formatEther, formatUnits } from 'ethers';
 import dotenv from 'dotenv';
 

@@ -1,6 +1,6 @@
-import { IWalletService } from '../interfaces/wallet_service';
+import { IWalletService } from '../../interfaces/wallet_service';
 import { ethers } from 'ethers';
-import { Wallet } from '../../types/types';
+import { Wallet } from '../../../types/types';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,7 +9,7 @@ export class SepoliaWalletService implements IWalletService {
 
     constructor() {
         // Sepolia test ağına bağlanıyoruz
-        this.provider = new ethers.JsonRpcProvider('https://sepolia.infura.io/v3/ca7d292e8ee143709e66cb9f47010744');
+        this.provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`);
     }
 
     async getWalletByPublicKey(publicKey: string): Promise<Wallet> {

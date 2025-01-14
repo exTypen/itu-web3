@@ -7,7 +7,7 @@
   "description": "Blockchain ağı üzerindeki swap işlemlerini ve pool mekanizmalarını simüle eden konsol uygulaması.",
   "main": "dist/index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js",
+    "start": "tsc && node --no-warnings dist/index.js",
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",

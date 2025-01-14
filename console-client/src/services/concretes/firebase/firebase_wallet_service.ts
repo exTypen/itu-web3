@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { Wallet } from '../../types/types';
+import { Wallet } from '../../../types/types';
 import dotenv from 'dotenv';
-import { IWalletService } from '../interfaces/wallet_service';
+import { IWalletService } from '../../interfaces/wallet_service';
 dotenv.config();
 
 export class FirebaseWalletService implements IWalletService {

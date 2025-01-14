@@ -3,37 +3,37 @@ import authManager from '../managers/auth_manager';
 import ItuScanMenu from './ituscan_menu';
 import WalletMenu from './wallet_menu';
 import PoolsMenu from './pools_menu';
+import ServiceProvider from '../providers/service_provider';
+import chalk from 'chalk';
+import { printHeader } from '../utils/header_utils';
 
 async function MainMenu(): Promise<void> {
+  console.clear();
+  printHeader();
+
   if (!authManager.isLoggedIn() && authManager.hasStoredWallet()) {
     const { password } = await inquirer.prompt([
       {
         type: 'password',
         name: 'password',
-        message: 'Cüzdanınızı açmak için şifrenizi girin:',
+        message: 'Enter your password to unlock your wallet:',
       },
     ]);
 
     const success = await authManager.loadWallet(password);
     if (!success) {
-      console.log('Hatalı şifre veya bozuk veri!');
+      console.log('Invalid password or corrupted data!');
+    } else {
+      console.clear();
+      printHeader();
     }
   }
-
-  if (authManager.isLoggedIn()) {
-    console.log('\nBağlı Cüzdan: ' + authManager.getPublicKey());
-  } else {
-    console.log('Cüzdan bağlı değil');
-  }
-
-  console.log(
-    '----------------------------------------------------------------------------------------'
-  );
 
   const choices: any[] = [
     { name: 'My Balances', disabled: !authManager.isLoggedIn() },
     { name: 'ITUScan' },
     { name: 'Pools' },
+    { name: 'Change Chain' },
   ];
 
   authManager.isLoggedIn()
@@ -61,23 +61,34 @@ async function MainMenu(): Promise<void> {
   } else if (choice === 'Pools') {
     await PoolsMenu();
     await MainMenu();
+  } else if (choice === 'Change Chain') {
+    const { chain } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'chain',
+        message: 'Select Chain:',
+        choices: ['firebase', 'sepolia'],
+      },
+    ]);
+    ServiceProvider.setChain(chain);
+    await MainMenu();
   } else if (choice === 'Initialize Wallet') {
     const { privateKey, password } = await inquirer.prompt([
       {
         type: 'input',
         name: 'privateKey',
-        message: 'Private key\'inizi girin:',
+        message: 'Enter your private key:',
       },
       {
         type: 'password',
         name: 'password',
-        message: 'Cüzdanınız için bir şifre belirleyin:',
+        message: 'Set a password for your wallet:',
       }
     ]);
 
     const success = await authManager.setWallet(privateKey, password);
     if (!success) {
-      console.log('Cüzdan oluşturulurken bir hata oluştu. Lütfen private key\'i kontrol edin.');
+      console.log('An error occurred while creating the wallet. Please check your private key.');
     }
     await MainMenu();
   } else if (choice === 'Disconnect') {

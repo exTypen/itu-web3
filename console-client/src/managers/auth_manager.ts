@@ -61,7 +61,7 @@ class AuthManager {
       this.privateKey = formattedPrivateKey;
       return this.loggedIn;
     } catch (error) {
-      console.error('Private key formatı geçersiz:', error);
+      console.error('Invalid private key format:', error);
       return false;
     }
   }
@@ -81,7 +81,7 @@ class AuthManager {
       this.privateKey = privateKey;
       return true;
     } catch (error) {
-      console.error('Cüzdan yüklenirken hata:', error);
+      console.error('Error loading wallet:', error);
       return false;
     }
   }
@@ -97,7 +97,7 @@ class AuthManager {
         fs.unlinkSync(this.walletPath);
       }
     } catch (error) {
-      console.error('Wallet dosyası silinirken hata oluştu:', error);
+      console.error('Error deleting wallet file:', error);
     }
   }
 

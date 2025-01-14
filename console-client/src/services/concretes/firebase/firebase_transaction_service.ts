@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { Transaction } from '../../types/types';
+import { Transaction } from '../../../types/types';
 import dotenv from 'dotenv';
-import { ITransactionService } from '../interfaces/transaction_service';
+import { ITransactionService } from '../../interfaces/transaction_service';
 dotenv.config();
 
 export class FirebaseTransactionService implements ITransactionService {

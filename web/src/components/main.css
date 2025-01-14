@@ -1,0 +1,118 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #919100;
+    color: #eee;
+  }
+  
+  .middle-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  header {
+    background-color: black;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  header .logo {
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  header .search {
+    margin-right: 10px;
+  }
+  
+  header .search input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: black;
+  }
+  
+  header .actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: #eee;
+    color: black;
+    cursor: pointer;
+  }
+  
+  main {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .swap-box {
+    background-color: #4a0041;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
+  
+  .sell-section,
+  .buy-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .sell-section label,
+  .buy-section label {
+    margin-right: 10px;
+    color: white;
+  }
+  
+  .sell-section input,
+  .buy-section input,
+  .sell-section select,
+  .buy-section select {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background-color: #000000;
+    color: rgb(255, 242, 0);
+  }
+  
+  .sell-section select,
+  .buy-section select{
+      margin-left: 10px;
+  }
+  
+  .arrow-down {
+    text-align: center;
+    margin: 10px 0;
+    color: white;
+  }
+  
+  .get-started-button {
+    background-color: #f0f;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .description {
+    margin-top: 20px;
+    color: #ddd;
+  }

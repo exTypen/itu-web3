@@ -4,7 +4,7 @@ import authManager from '../managers/auth_manager';
 import chalk from 'chalk';
 import AddLiquidityMenu from './add_liquidity_menu';
 import ServiceProvider from '../providers/service_provider';
-
+import { printHeader } from '../utils/header_utils';
 async function PoolMenu(pool_id: string): Promise<void> {
   const poolService = ServiceProvider.getPoolService();
   const tokenService = ServiceProvider.getTokenService();
@@ -15,6 +15,9 @@ async function PoolMenu(pool_id: string): Promise<void> {
     { name: 'Pool Info' },
     { name: 'Return Back', value: 'Return Back' },
   ];
+
+  console.clear();
+  printHeader();
 
   const { choice } = await inquirer.prompt([
     {
@@ -42,7 +45,21 @@ async function PoolMenu(pool_id: string): Promise<void> {
       );
       console.log(`${chalk.blue.bold('k')}: ${chalk.yellow.bold(pool.k)}`);
     }
-    await PoolMenu(pool_id);
+    const { action } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: 'Pool Info',
+        choices: [
+          { name: 'Back', value: 'back' }
+        ]
+      }
+    ]);
+  
+    if (action === 'back') {
+      return;
+    }
+    
   } else if (choice === 'Return Back') {
   }
 }
