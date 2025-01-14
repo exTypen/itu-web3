@@ -1,6 +1,6 @@
-import { IWalletService } from '../interfaces/wallet_service';
+import { IWalletService } from '../../interfaces/wallet_service';
 import { ethers } from 'ethers';
-import { Wallet } from '../../types/types';
+import { Wallet } from '../../../types/types';
 import dotenv from 'dotenv';
 dotenv.config();
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { Pool } from '../../types/types';
+import { Pool } from '../../../types/types';
 import dotenv from 'dotenv';
-import { IPoolService } from '../interfaces/pool_service';
+import { IPoolService } from '../../interfaces/pool_service';
 dotenv.config();
 
 export class FirebasePoolService implements IPoolService {

@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import { Token } from '../../types/types';
-import { ITokenService } from '../interfaces/token_service';
+import { Token } from '../../../types/types';
+import { ITokenService } from '../../interfaces/token_service';
 import dotenv from 'dotenv';
 dotenv.config();
 

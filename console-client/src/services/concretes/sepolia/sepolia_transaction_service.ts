@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
-import AuthManager from '../../managers/auth_manager';
-import { ITransactionService } from '../interfaces/transaction_service';
-import { Transaction } from '../../types/types';
+import AuthManager from '../../../managers/auth_manager';
+import { ITransactionService } from '../../interfaces/transaction_service';
+import { Transaction } from '../../../types/types';
 import dotenv from 'dotenv';
 dotenv.config();
 
